@@ -5445,6 +5445,12 @@ The higher-order `count_frames` function tracks `open_count`, the number of call
 
 ![image-20250706161815133](./assets/image-20250706161815133.png)
 
+```scheme
+#t #f
+```
+
+表示True 和 False
+
 #### Special Forms
 
 ![image-20250706162550143](./assets/image-20250706162550143.png)
@@ -5758,13 +5764,237 @@ scm> (zero? 3)
 
 ![image-20250708223315169](./assets/image-20250708223315169.png)
 
+#### 几个List题目
+
+**Q1: Ascending**
+
+
+
+**Question:** Implement a procedure called `ascending?`, which takes a list of numbers `s` and returns `True` if the numbers are in non-descending order, and `False` otherwise. A list of numbers is non-descending if each element after the first is greater than or equal to the previous element. For example... `(1 2 3 3 4)` is non-descending. `(1 2 3 3 2)` is not. **Hint:** The built-in `null?` procedure returns whether its argument is `nil`. **Note:** The question mark in `ascending?` is just part of the procedure name and has no special meaning in terms of Scheme syntax. It is a common practice in Scheme to name procedures with a question mark at the end if it returns a boolean value.
+
+Scheme
+
+```
+(define (ascending? s)
+  (if (or (null? s) (null? (cdr s)))
+      #t
+      (and (<= (car s) (car (cdr s))) (ascending? (cdr s)))))
+```
+
+------
+
+
+
+**Q2: My Filter**
+
+
+
+**Question:** Write a procedure `my-filter`, which takes in a one-argument predicate function `pred` and a list `s`, and returns a new list containing only elements in list `s` that satisfy the predicate. The returned list should contain the elements in the same order that they appeared in the original list `s`. For example, `(my-filter even? '(1 2 3 4 5))` should return `(2 4)` because only `2` and `4` are even. **Note:** You are *not allowed* to use the Scheme built-in `filter` function in this question - we are asking you to re-implement this!
+
+Scheme
+
+```
+(define (my-filter pred s)
+  (cond ((null? s) '())
+        ((pred (car s)) (cons (car s) (my-filter pred (cdr s))))
+        (else (my-filter pred (cdr s)))))
+```
+
+------
+
+
+
+**Q3: Interleave**
+
+
+
+**Question:** Implement the function `interleave`, which takes two lists `lst1` and `lst2` as arguments, and returns a new list that alternates elements from both lists, starting with `lst1`. If one of the input lists is shorter than the other, `interleave` should include elements from both lists until the shorter list is exhausted, then append the remaining elements of the longer list to the end. If either `lst1` or `lst2` is empty, the function should simply return the other non-empty list. For example: `(interleave '(1 2 3) '(4 5 6))` should return `(1 4 2 5 3 6)`. `(interleave '(7 8 9 10) '(11 12))` should return `(7 11 8 12 9 10)`.
+
+Scheme
+
+```
+(define (interleave lst1 lst2)
+  (cond ((null? lst1) lst2)
+        ((null? lst2) lst1)
+        (else (cons (car lst1) (interleave lst2 (cdr lst1))))))
+```
+
+------
+
+
+
+**Q4: No Repeats**
+
+
+
+**Question:** Implement `no-repeats`, which takes a list of numbers `s`. It returns a list that has all of the unique elements of `s` in the order that they first appear, but no repeats. For example, `(no-repeats (list 5 4 5 4 2 2))` evaluates to `(5 4 2)`. **Hint:** You may find it helpful to use `filter` with a `lambda` procedure to filter out repeats. To test if two numbers `a` and `b` are not equal, use `(not (= a b))`.
+
+Scheme
+
+```
+(define (no-repeats s)
+  (if (null? s) s
+      (cons (car s) (no-repeats (filter (lambda (x) (not (= x (car s))))
+                                        (cdr s))))))
+```
+
 #### Symbolic Programming
 
 ![image-20250708224248378](./assets/image-20250708224248378.png)
+
+核心区别总结：
+
+
+
+| 特性       | `(list ...)`                                 | `'(...)`                                       |
+| ---------- | -------------------------------------------- | ---------------------------------------------- |
+| **功能**   | 是一个**函数调用**，用于**动态创建新列表**。 | 是一个**特殊语法**，用于**引用字面数据**。     |
+| **求值**   | 解释器会求值其参数，然后用参数的值构造列表。 | 解释器不会求值其内部，直接将整个结构视为数据。 |
+| **何时用** | 当你需要根据变量或计算结果来构建列表时。     | 当你需要表示一个固定的、不变的列表数据时。     |
 
 #### List Processing
 
 ![image-20250708224655407](./assets/image-20250708224655407.png)
 
 ![image-20250708225012530](./assets/image-20250708225012530.png)
+
+#### Example: Even Subsets（没弄懂）
+
+![image-20250709222857415](./assets/image-20250709222857415.png)
+
+这张图片展示了一段 Lisp/Scheme 代码，它定义了两个函数 `even-subsets` 和 `odd-subsets`，以及一个辅助函数 `subset-helper`，用于找出给定整数列表 `s` 中所有非空子集，并根据子集元素的和是偶数还是奇数进行分类。
+
+
+
+**1. `even-subsets s`**
+
+
+
+这个函数用于找到输入列表 `s` 中所有元素和为偶数的非空子集。
+
+- `(define (even-subsets s) ...)`: 定义了一个名为 `even-subsets` 的函数，它接受一个参数 `s`（列表）。
+- `(if (null? s) nil ...)`: 这是基本情况。如果输入列表 `s` 为空 (`null? s` 为真)，则返回 `nil` (空列表)，因为没有非空子集。
+- `(append (even-subsets (cdr s)) (subset-helper even? s)))`: 这是递归步骤。
+  - `(even-subsets (cdr s))`: 递归调用 `even-subsets` 处理列表的剩余部分 (`cdr s` 表示列表的尾部，即除第一个元素外的所有元素)。这会找到列表中除去第一个元素后的所有偶数和子集。
+  - `(subset-helper even? s)`: 调用 `subset-helper` 辅助函数。
+    - `even?`: 这是一个谓词函数（返回真或假），用于检查一个数字是否是偶数。
+    - `s`: 当前列表。
+    - `subset-helper` (下面会解释) 将生成包含 `(car s)` (列表的头部，即第一个元素) 的子集，并根据 `even?` 来判断它们的和的奇偶性。
+  - `append`: 将递归调用结果（来自列表尾部的偶数和子集）和 `subset-helper` 生成的子集合并起来。
+
+
+
+**2. `odd-subsets s`**
+
+
+
+这个函数与 `even-subsets` 类似，但它用于找到输入列表 `s` 中所有元素和为奇数的非空子集。
+
+- `(define (odd-subsets s) ...)`: 定义了一个名为 `odd-subsets` 的函数，接受一个参数 `s`。
+- `(if (null? s) nil ...)`: 基本情况：如果 `s` 为空，返回 `nil`。
+- `(append (odd-subsets (cdr s)) (subset-helper odd? s)))`: 递归步骤，与 `even-subsets` 类似。
+  - `(odd-subsets (cdr s))`: 递归地从列表尾部找到奇数和子集。
+  - `(subset-helper odd? s)`: 调用 `subset-helper`，传入 `odd?` (一个检查数字是否为奇数的谓词) 和当前列表 `s`。
+
+
+
+**3. `subset-helper f s`**
+
+
+
+这是核心辅助函数，它根据第一个元素 (`car s`) 的奇偶性以及给定的谓词 `f` (可以是 `even?` 或 `odd?`) 来生成子集。
+
+- `(define (subset-helper f s) ...)`: 定义了一个名为 `subset-helper` 的函数，接受两个参数：一个谓词 `f` 和一个列表 `s`。
+- `(append ...)`: 将两个部分的结果合并。
+  - **第一部分 (包含 `(car s)` 的子集):**
+    - `(map (lambda (t) (cons (car s) t)) ...)`: `map` 函数将一个匿名函数 `(lambda (t) (cons (car s) t))` 应用到其后续参数（一个列表）的每个元素上。这个匿名函数的作用是将当前列表的第一个元素 `(car s)` 添加到每个子集 `t` 的前面，从而创建新的子集。
+    - `(if (f (car s)) (even-subsets (cdr s)) (odd-subsets (cdr s)))`: 这个 `if` 语句根据 `(car s)` 的奇偶性（由谓词 `f` 判断）来决定接下来的子集应该从哪里获取。
+      - 如果 `(f (car s))` 为真（即 `(car s)` 满足谓词 `f` 的条件，例如，如果 `f` 是 `even?` 且 `(car s)` 是偶数），那么它会调用 `(even-subsets (cdr s))` 来获取列表剩余部分的偶数和子集。
+      - 否则（如果 `(car s)` 不满足谓词 `f` 的条件，例如，如果 `f` 是 `even?` 但 `(car s)` 是奇数），它会调用 `(odd-subsets (cdr s))` 来获取列表剩余部分的奇数和子集。
+      - 这个逻辑有点复杂，它的目的是确保当 `(car s)` 被加入到子集时，新形成的子集的总和的奇偶性符合要求。例如，如果 `f` 是 `even?` 且 `(car s)` 是偶数，那么为了让最终子集和为偶数，我们需要从 `(cdr s)` 中找到偶数和子集。如果 `f` 是 `even?` 但 `(car s)` 是奇数，那么为了让最终子集和为偶数，我们需要从 `(cdr s)` 中找到奇数和子集 (奇数 + 奇数 = 偶数)。
+  - **第二部分 (只包含 `(car s)` 的子集，作为独立子集):**
+    - `(if (f (car s)) (list (list (car s))) nil)`: 这个 `if` 语句处理只包含 `(car s)` 本身的子集。
+      - 如果 `(f (car s))` 为真（即 `(car s)` 满足谓词 `f` 的条件，例如，`even?` 的情况下 `(car s)` 是偶数），那么它会创建一个只包含 `(car s)` 的子集 `(list (list (car s)))`。这确保了单个元素作为子集时也能满足和的奇偶性要求。
+      - 否则（如果 `(car s)` 不满足谓词 `f` 的条件），则返回 `nil`。
+
+**总结一下 `subset-helper` 的作用：**
+
+`subset-helper f s` 的目的是生成所有包含 `(car s)` 的子集，并且这些子集的总和满足谓词 `f` 的条件。它通过两种方式实现：
+
+1. 将 `(car s)` 添加到 `(cdr s)` 中符合特定奇偶性条件的子集前面，以确保新形成的子集的总和满足 `f`。
+2. 如果 `(car s)` 自身满足 `f` 的条件，则将其作为一个单独的子集返回。
+
+这个代码通过递归和分治的思想，巧妙地构建了所有符合条件的非空子集。
+
+![image-20250709223409992](./assets/image-20250709223409992.png)
+
+### 30. Calculator
+
+#### Exceptions
+
+![image-20250709223717024](./assets/image-20250709223717024.png)
+
+![image-20250709224151803](./assets/image-20250709224151803.png)
+
+define a new class that inherits from `Exception`.
+
+```python
+>>> class IterImproveError(Exception):
+        def __init__(self, last_guess):
+            self.last_guess = last_guess
+```
+
+#### Programming Languages
+
+![image-20250709231011130](./assets/image-20250709231011130.png)
+
+![image-20250709231300179](./assets/image-20250709231300179.png)
+
+#### Parsing
+
+![image-20250709233521483](./assets/image-20250709233521483.png)
+
+![image-20250709233644719](./assets/image-20250709233644719.png)
+
+#### Scheme-Syntax Calculator
+
+![image-20250709233904683](./assets/image-20250709233904683.png)
+
+![image-20250709234021970](./assets/image-20250709234021970.png)
+
+#### Evaluation
+
+![image-20250709235504102](./assets/image-20250709235504102.png)
+
+![image-20250709235646151](./assets/image-20250709235646151.png)
+
+![image-20250709235722728](./assets/image-20250709235722728.png)
+
+![image-20250709235827493](./assets/image-20250709235827493.png)![image-20250709235913390](./assets/image-20250709235913390.png)
+
+```python
+>>> def read_eval_print_loop():
+        """Run a read-eval-print loop for calculator."""
+        while True:
+            try:
+                src = buffer_input()
+                while src.more_on_line:
+                    expression = scheme_read(src)
+                    print(calc_eval(expression))
+            except (SyntaxError, TypeError, ValueError, ZeroDivisionError) as err:
+                print(type(err).__name__ + ':', err)
+            except (KeyboardInterrupt, EOFError):  # <Control>-D, etc.
+                print('Calculation completed.')
+                return
+```
+
+
+
+#### Interactive Interpreters
+
+![image-20250710000526501](./assets/image-20250710000526501.png)
+
+![image-20250710002354355](./assets/image-20250710002354355.png)
+
+![image-20250710002610683](./assets/image-20250710002610683.png)
 
